@@ -1,8 +1,6 @@
 from StringIO import StringIO
 import numpy as np
 
-from kt import compute_kt_table
-
 
 class Node(object):
     """
@@ -41,7 +39,6 @@ class WCTBinary(object):
 
     def __init__(self, depth):
         self.depth = depth
-        self.kt_table = compute_kt_table(depth, depth)
         self.arr_a = np.zeros(self.MAX_NODES, dtype=np.int)
         self.arr_b = np.zeros(self.MAX_NODES, dtype=np.int)
         self.arr_pe = np.zeros(self.MAX_NODES)
@@ -77,7 +74,7 @@ class WCTBinary(object):
 
     def nodes_in_preorder(self):
         """
-        Return list of Nodes in preorder.
+        Return list of Nodes in preorder (1 child, then 0 child, then self).
         """
         return self._nodes_rec(self.root_id, "")
 
@@ -101,7 +98,7 @@ class WCTBinary(object):
         Update tree upon seeing next_bit after the given context.
         """
         assert len(context) == self.depth
-        self._update_rec(self.root_id, context, next_bit)
+        self._update_rec(self.root_id, context[:], next_bit)
 
     def _update_rec(self, node_id, context, next_bit):
         """
@@ -119,11 +116,8 @@ class WCTBinary(object):
             self._update_rec(child_id, context, next_bit)
 
         # Now update this node.
-        assert next_bit in (0, 1)
-        count_arr = (self.arr_a, self.arr_b)[next_bit]
-        count_arr[node_id] += 1
+        self._update_node(node_id, next_bit)
         self._sanity_check(node_id)
-        self._update_pe_pw(node_id)
 
     def _create_leaf(self):
         assert self.next_id < self.MAX_NODES
@@ -162,20 +156,39 @@ class WCTBinary(object):
             assert a == self.get_a(i0c, 0) + self.get_a(i1c, 0)
             assert b == self.get_b(i0c, 0) + self.get_b(i1c, 0)
 
-    def _update_pe_pw(self, node_id):
+    def _update_node(self, node_id, next_bit):
         """
-        Update pe, pw for the given node.
+        Update a, b, pe, pw for the given node.
         """
+        assert next_bit in (0, 1)
+
+        # Update a, b, pe:
         a, b = self.arr_a[node_id], self.arr_b[node_id]
+        pe = self.arr_pe[node_id]
+        if next_bit == 0:
+            new_pe = pe * (a + 0.5) / (a + b + 1)
+            new_a, new_b = a + 1, b
+        else:
+            new_pe = pe * (b + 0.5) / (a + b + 1)
+            new_a, new_b = a, b + 1
+
+        count_arr = (self.arr_a, self.arr_b)[next_bit]
+        count_arr[node_id] += 1
+
+        # Update pw.
         i0c, i1c = self.arr_0c[node_id], self.arr_1c[node_id]
-        self.arr_pe[node_id] = self.kt_table[a, b]
         if i0c == self.NO_CHILD and i1c == self.NO_CHILD:
             # Leaf.
-            self.arr_pw[node_id] = self.arr_pe[node_id]
+            new_pw = new_pe
         else:
             # Non-leaf.
-            self.arr_pw[node_id] = (
-                0.5 * self.arr_pe[node_id] +
+            new_pw = (
+                0.5 * new_pe +
                 0.5 * self.get_pw(i0c, 1) * self.get_pw(i1c, 1))
+
+        self.arr_a[node_id] = new_a
+        self.arr_b[node_id] = new_b
+        self.arr_pe[node_id] = new_pe
+        self.arr_pw[node_id] = new_pw
 
         # FIXME: need log probs
