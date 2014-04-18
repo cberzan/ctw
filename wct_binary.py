@@ -4,6 +4,34 @@ import numpy as np
 from kt import compute_kt_table
 
 
+class Node(object):
+    """
+    Self-contained representation of a node in a WCTBinary.
+
+    Note: This structure is not space-efficient. It is used only by
+    WCTBinary.__str__ and the tests. It is NOT used during the normal
+    operation of WCTBinary.
+    """
+    def __init__(self, path, a, b, pe, pw):
+        self.path = path
+        self.a = a
+        self.b = b
+        self.pe = pe
+        self.pw = pw
+
+    def __str__(self):
+        return "{}: a={} b={} pe={} pw={}".format(
+            self.path, self.a, self.b, self.pe, self.pw)
+
+    def __eq__(self, other):
+        return (
+            self.path == other.path and
+            self.a == other.a and
+            self.b == other.b and
+            np.abs(self.pe - other.pe) < 1e-7 and
+            np.abs(self.pw - other.pw) < 1e-7)
+
+
 class WCTBinary(object):
     """
     Binary weighted context tree.
@@ -43,29 +71,41 @@ class WCTBinary(object):
 
     def __str__(self):
         stream = StringIO()
-        self._print_rec(self.root_id, "", stream)
+        for node in self.nodes_in_preorder():
+            print >>stream, node
         return stream.getvalue()
 
-    def _print_rec(self, node_id, path, stream):
+    def nodes_in_preorder(self):
         """
-        Recursively print tree.
+        Return list of Nodes in preorder.
         """
+        return self._nodes_rec(self.root_id, "")
+
+    def _nodes_rec(self, node_id, path):
+        """
+        Recursive helper for nodes_in_preorder().
+        """
+        nodes = []
         if self.arr_1c[node_id] != self.NO_CHILD:
-            self._print_rec(self.arr_1c[node_id], "1" + path, stream)
+            nodes += self._nodes_rec(self.arr_1c[node_id], "1" + path)
         if self.arr_0c[node_id] != self.NO_CHILD:
-            self._print_rec(self.arr_0c[node_id], "0" + path, stream)
-        print >>stream, "{}{}: a={} b={} pe={} pw={}".format(
-            " " * (self.depth - len(path)), path,
+            nodes += self._nodes_rec(self.arr_0c[node_id], "0" + path)
+        nodes.append(Node(
+            " " * (self.depth - len(path)) + path,
             self.arr_a[node_id], self.arr_b[node_id],
-            self.arr_pe[node_id], self.arr_pw[node_id])
+            self.arr_pe[node_id], self.arr_pw[node_id]))
+        return nodes
 
     def update(self, context, next_bit):
+        """
+        Update tree upon seeing next_bit after the given context.
+        """
         assert len(context) == self.depth
         self._update_rec(self.root_id, context, next_bit)
 
     def _update_rec(self, node_id, context, next_bit):
         """
-        Update tree upon seeing next_bit after the given context.
+        Recursive helper for update().
         """
         # Recursively update the appropriate child.
         if not context:
