@@ -4,18 +4,6 @@ import numpy as np
 from kt import compute_kt_table
 
 
-def _make_getter(array_name):
-    """
-    Return a getter method that returns default if the node is NO_CHILD.
-    """
-    def getter(self, node_id, default):
-        if node_id == self.NO_CHILD:
-            return default
-        else:
-            return getattr(self, array_name)[node_id]
-    return getter
-
-
 class WCTBinary(object):
     """
     Binary weighted context tree.
@@ -35,10 +23,23 @@ class WCTBinary(object):
         self.next_id = 0
         self.root_id = self._create_leaf()
 
-        # Set up getter methods.
-        self.get_a = _make_getter('arr_a')
-        self.get_b = _make_getter('arr_b')
-        self.get_pw = _make_getter('arr_pw')
+    def get_a(self, node_id, default):
+        if node_id == self.NO_CHILD:
+            return default
+        else:
+            return self.arr_a[node_id]
+
+    def get_b(self, node_id, default):
+        if node_id == self.NO_CHILD:
+            return default
+        else:
+            return self.arr_b[node_id]
+
+    def get_pw(self, node_id, default):
+        if node_id == self.NO_CHILD:
+            return default
+        else:
+            return self.arr_pw[node_id]
 
     def __str__(self):
         stream = StringIO()
