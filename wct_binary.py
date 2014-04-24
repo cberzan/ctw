@@ -3,7 +3,7 @@ from StringIO import StringIO
 import numpy as np
 
 
-NodeParams = namedtuple('NodeParams', ['a', 'b', 'pe', 'pw'])
+NodeParams = namedtuple('NodeParams', ['a', 'b', 'lpe', 'lpw'])
 
 
 class Node(object):
@@ -14,24 +14,27 @@ class Node(object):
     WCTBinary.__str__ and the tests. It is NOT used during the normal
     operation of WCTBinary.
     """
-    def __init__(self, path, a, b, pe, pw):
+    def __init__(self, path, a, b, lpe, lpw):
         self.path = path
         self.a = a
         self.b = b
-        self.pe = pe
-        self.pw = pw
+        self.lpe = lpe
+        self.lpw = lpw
 
-    def __str__(self):
-        return "{}: a={} b={} pe={} pw={}".format(
-            self.path, self.a, self.b, self.pe, self.pw)
+    def __repr__(self):
+        return "{}: a={} b={} lpe={} lpw={}".format(
+            self.path, self.a, self.b, self.lpe, self.lpw)
 
     def __eq__(self, other):
         return (
             self.path == other.path and
             self.a == other.a and
             self.b == other.b and
-            np.abs(self.pe - other.pe) < 1e-7 and
-            np.abs(self.pw - other.pw) < 1e-7)
+            np.abs(self.lpe - other.lpe) < 1e-7 and
+            np.abs(self.lpw - other.lpw) < 1e-7)
+
+    def clone(self):
+        return Node(self.path, self.a, self.b, self.lpe, self.lpw)
 
 
 class WCTBinary(object):
@@ -45,8 +48,8 @@ class WCTBinary(object):
         self.depth = depth
         self.arr_a = np.zeros(self.MAX_NODES, dtype=np.int)
         self.arr_b = np.zeros(self.MAX_NODES, dtype=np.int)
-        self.arr_pe = np.zeros(self.MAX_NODES)
-        self.arr_pw = np.zeros(self.MAX_NODES)
+        self.arr_lpe = np.zeros(self.MAX_NODES)
+        self.arr_lpw = np.zeros(self.MAX_NODES)
         self.arr_0c = np.zeros(self.MAX_NODES, dtype=np.int)
         self.arr_1c = np.zeros(self.MAX_NODES, dtype=np.int)
         self.next_id = 0
@@ -64,11 +67,11 @@ class WCTBinary(object):
         else:
             return self.arr_b[node_id]
 
-    def get_pw(self, node_id, default):
+    def get_lpw(self, node_id, default):
         if node_id == self.NO_CHILD:
             return default
         else:
-            return self.arr_pw[node_id]
+            return self.arr_lpw[node_id]
 
     def __str__(self):
         stream = StringIO()
@@ -94,7 +97,7 @@ class WCTBinary(object):
         nodes.append(Node(
             " " * (self.depth - len(path)) + path,
             self.arr_a[node_id], self.arr_b[node_id],
-            self.arr_pe[node_id], self.arr_pw[node_id]))
+            self.arr_lpe[node_id], self.arr_lpw[node_id]))
         return nodes
 
     def update_many(self, context, bits):
@@ -145,8 +148,8 @@ class WCTBinary(object):
         assert self.next_id < self.MAX_NODES
         self.arr_a[self.next_id] = 0
         self.arr_b[self.next_id] = 0
-        self.arr_pe[self.next_id] = 1
-        self.arr_pw[self.next_id] = 1
+        self.arr_lpe[self.next_id] = 0
+        self.arr_lpw[self.next_id] = 0
         self.arr_0c[self.next_id] = self.NO_CHILD
         self.arr_1c[self.next_id] = self.NO_CHILD
         node_id = self.next_id
@@ -181,40 +184,41 @@ class WCTBinary(object):
     def _update_node(self, node_id, next_bit, child_bit, child_params,
                      dry_run=False):
         """
-        Update a, b, pe, pw for the given node.
+        Update a, b, lpe, lpw for the given node.
         """
         assert next_bit in (0, 1)
 
-        # Update a, b, pe:
+        # Update a, b, lpe:
         a, b = self.arr_a[node_id], self.arr_b[node_id]
-        pe = self.arr_pe[node_id]
+        lpe = self.arr_lpe[node_id]
         if next_bit == 0:
-            new_pe = pe * (a + 0.5) / (a + b + 1)
+            new_lpe = lpe + np.log((a + 0.5) / (a + b + 1))
             new_a, new_b = a + 1, b
         else:
-            new_pe = pe * (b + 0.5) / (a + b + 1)
+            new_lpe = lpe + np.log((b + 0.5) / (a + b + 1))
             new_a, new_b = a, b + 1
 
-        # Update pw.
+        # Update lpw.
         i0c, i1c = self.arr_0c[node_id], self.arr_1c[node_id]
         if i0c == self.NO_CHILD and i1c == self.NO_CHILD:
             # Leaf.
-            new_pw = new_pe
+            new_lpw = new_lpe
         else:
             # Non-leaf.
-            pw0 = child_params.pw if child_bit == 0 else self.get_pw(i0c, 1)
-            pw1 = child_params.pw if child_bit == 1 else self.get_pw(i1c, 1)
-            new_pw = 0.5 * new_pe + 0.5 * pw0 * pw1
+            lpw0 = child_params.lpw if child_bit == 0 else self.get_lpw(i0c, 0)
+            lpw1 = child_params.lpw if child_bit == 1 else self.get_lpw(i1c, 0)
+            new_lpw = np.logaddexp(np.log(0.5) + new_lpe,
+                                   np.log(0.5) + lpw0 + lpw1)
 
         if not dry_run:
             self.arr_a[node_id] = new_a
             self.arr_b[node_id] = new_b
-            self.arr_pe[node_id] = new_pe
-            self.arr_pw[node_id] = new_pw
+            self.arr_lpe[node_id] = new_lpe
+            self.arr_lpw[node_id] = new_lpw
 
         # FIXME: need log probs
 
-        return NodeParams(new_a, new_b, new_pe, new_pw)
+        return NodeParams(new_a, new_b, new_lpe, new_lpw)
 
     def get_p0(self, context):
         """
@@ -222,4 +226,4 @@ class WCTBinary(object):
         """
         dummy0 = self.update(context, 0, dry_run=True)
         dummy1 = self.update(context, 1, dry_run=True)
-        return dummy0.pw / (dummy0.pw + dummy1.pw)
+        return np.exp(dummy0.lpw - np.logaddexp(dummy0.lpw, dummy1.lpw))
