@@ -25,6 +25,23 @@ def test_single_update():
     nose.tools.assert_equal(nodes[2], Node('  0', 1, 0, 0.5, 0.5))
     nose.tools.assert_equal(nodes[3], Node('   ', 1, 0, 0.5, 0.5))
 
+def test_dry_run():
+    tree = WCTBinary(3)
+    new_params = tree.update([0, 1, 0], 0, dry_run=True)
+    print new_params
+    print tree
+    nodes = tree.nodes_in_preorder()
+    # first make sure we didn't mess with the tree at all
+    nose.tools.assert_equal(len(nodes), 4)
+    nose.tools.assert_equal(nodes[0], Node('010', 0, 0, 1, 1))
+    nose.tools.assert_equal(nodes[1], Node(' 10', 0, 0, 1, 1))
+    nose.tools.assert_equal(nodes[2], Node('  0', 0, 0, 1, 1))
+    nose.tools.assert_equal(nodes[3], Node('   ', 0, 0, 1, 1))
+    # next make sure we computed the right new parameters
+    nose.tools.assert_equal(new_params['a'], 1)
+    nose.tools.assert_equal(new_params['b'], 0)
+    nose.tools.assert_equal(new_params['pe'], 0.5)
+    nose.tools.assert_equal(new_params['pw'], 0.5)
 
 def test_eidma_figure_3_2():
     tree = WCTBinary(3)

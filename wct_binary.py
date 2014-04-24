@@ -93,14 +93,14 @@ class WCTBinary(object):
             self.arr_pe[node_id], self.arr_pw[node_id]))
         return nodes
 
-    def update(self, context, next_bit):
+    def update(self, context, next_bit, dry_run=False):
         """
         Update tree upon seeing next_bit after the given context.
         """
         assert len(context) == self.depth
-        self._update_rec(self.root_id, context[:], next_bit)
+        return self._update_rec(self.root_id, context[:], next_bit, dry_run)
 
-    def _update_rec(self, node_id, context, next_bit):
+    def _update_rec(self, node_id, context, next_bit, dry_run=False):
         """
         Recursive helper for update().
         """
@@ -109,15 +109,19 @@ class WCTBinary(object):
             # Leaf.
             assert self.arr_0c[node_id] == self.NO_CHILD
             assert self.arr_1c[node_id] == self.NO_CHILD
+            child_bit = None
+            child_params = None
         else:
             # Non-leaf.
-            bit = context.pop()
-            child_id = self._get_or_create_child(node_id, bit)
-            self._update_rec(child_id, context, next_bit)
+            child_bit = context.pop()
+            child_id = self._get_or_create_child(node_id, child_bit)
+            child_params = self._update_rec(child_id, context, next_bit, dry_run)
 
         # Now update this node.
-        self._update_node(node_id, next_bit)
+        new_params = self._update_node(node_id, next_bit,
+                                       child_bit, child_params, dry_run)
         self._sanity_check(node_id)
+        return new_params
 
     def _create_leaf(self):
         assert self.next_id < self.MAX_NODES
@@ -150,13 +154,14 @@ class WCTBinary(object):
         i0c, i1c = self.arr_0c[node_id], self.arr_1c[node_id]
         if i0c == self.NO_CHILD and i1c == self.NO_CHILD:
             # Leaf.
-            assert a + b > 0
+            pass
         else:
             # Non-leaf.
             assert a == self.get_a(i0c, 0) + self.get_a(i1c, 0)
             assert b == self.get_b(i0c, 0) + self.get_b(i1c, 0)
 
-    def _update_node(self, node_id, next_bit):
+    def _update_node(self, node_id, next_bit, child_bit, child_params,
+                     dry_run=False):
         """
         Update a, b, pe, pw for the given node.
         """
@@ -172,9 +177,6 @@ class WCTBinary(object):
             new_pe = pe * (b + 0.5) / (a + b + 1)
             new_a, new_b = a, b + 1
 
-        count_arr = (self.arr_a, self.arr_b)[next_bit]
-        count_arr[node_id] += 1
-
         # Update pw.
         i0c, i1c = self.arr_0c[node_id], self.arr_1c[node_id]
         if i0c == self.NO_CHILD and i1c == self.NO_CHILD:
@@ -182,13 +184,16 @@ class WCTBinary(object):
             new_pw = new_pe
         else:
             # Non-leaf.
-            new_pw = (
-                0.5 * new_pe +
-                0.5 * self.get_pw(i0c, 1) * self.get_pw(i1c, 1))
+            pw0 = child_params['pw'] if child_bit == 0 else self.get_pw(i0c, 1)
+            pw1 = child_params['pw'] if child_bit == 1 else self.get_pw(i1c, 1)
+            new_pw = 0.5 * new_pe + 0.5 * pw0 * pw1
 
-        self.arr_a[node_id] = new_a
-        self.arr_b[node_id] = new_b
-        self.arr_pe[node_id] = new_pe
-        self.arr_pw[node_id] = new_pw
+        if not dry_run:
+            self.arr_a[node_id] = new_a
+            self.arr_b[node_id] = new_b
+            self.arr_pe[node_id] = new_pe
+            self.arr_pw[node_id] = new_pw
 
         # FIXME: need log probs
+
+        return {'a': new_a, 'b': new_b, 'pe': new_pe, 'pw': new_pw}
