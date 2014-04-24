@@ -33,8 +33,14 @@ class ArithmeticEncoder(object):
     """
     Arithmetic encoder.
 
-    TODO usage
-    explain bit order?
+    ```
+    encoder = ArithmeticEncoder()
+    for ...:
+        encoder.encode_bit(p0, bit)
+    result = encoder.get_encoded_data()
+    ```
+
+    TODO explain bit order?
     """
     def __init__(self):
         # store result of encoding:
@@ -51,7 +57,7 @@ class ArithmeticEncoder(object):
         self.encoded_buffer = None
 
     def _emit_bit(self, bit):
-        print "emit {}".format(bit)
+        # print "emit {}".format(bit)
         assert bit in (0, 1)
         self.cur_byte = (self.cur_byte << 1) | bit
         self.bits_in_cur_byte += 1
@@ -72,10 +78,10 @@ class ArithmeticEncoder(object):
             self._emit_bit(self.cur_ival_a >> 7)
             self.cur_ival_a = (self.cur_ival_a << 1) & 0xFF
             self.cur_ival_b = ((self.cur_ival_b << 1) & 0xFF) | 0x01
-            print (
-                "scaling      "
-                "old_a={:08b} old_b={:08b} new_a={:08b} new_b={:08b}"
-                .format(old_a, old_b, self.cur_ival_a, self.cur_ival_b))
+            # print (
+            #     "scaling      "
+            #     "old_a={:08b} old_b={:08b} new_a={:08b} new_b={:08b}"
+            #     .format(old_a, old_b, self.cur_ival_a, self.cur_ival_b))
 
         # Subdivide current interval according to p0, and take one of the two
         # resulting sub-intervals, based on bit.
@@ -85,21 +91,21 @@ class ArithmeticEncoder(object):
             self.cur_ival_a, self.cur_ival_b = a0, b0
         else:
             self.cur_ival_a, self.cur_ival_b = a1, b1
-        print (
-            "p0={} bit={} old_a={:08b} old_b={:08b} new_a={:08b} new_b={:08b}"
-            .format(p0, bit, old_a, old_b, self.cur_ival_a, self.cur_ival_b))
+        # print (
+        #     "p0={} bit={} old_a={:08b} old_b={:08b} new_a={:08b} new_b={:08b}"
+        #     .format(p0, bit, old_a, old_b, self.cur_ival_a, self.cur_ival_b))
 
         self.msg_len += 1
 
     def get_encoded_data(self):
         if not self.encoded_buffer:
             # Finalize encoding by emitting cur_ival_a.
-            print "emitting cur_ival_a"
+            # print "emitting cur_ival_a"
             for pos in range(7, -1, -1):
                 self._emit_bit(1 if self.cur_ival_a & (1 << pos) else 0)
 
             # Pad with zeros, at least once, and up to a complete byte.
-            print "padding"
+            # print "padding"
             self._emit_bit(0)
             while self.bits_in_cur_byte:
                 self._emit_bit(0)
@@ -114,7 +120,12 @@ class ArithmeticDecoder(object):
     """
     Arithmetic decoder.
 
-    TODO usage
+    ```
+    decoder = ArithmeticDecoder()
+    for ...:
+        decoder.decode_bit(p0)
+    result = decoder.get_decoded_data()
+    ```
     """
     def __init__(self, msg_len, encoded_buffer):
         self.msg_len = msg_len
@@ -137,7 +148,7 @@ class ArithmeticDecoder(object):
         self.decoded_buffer = None
 
     def _emit_bit(self, bit):
-        print "emit {}".format(bit)
+        # print "emit {}".format(bit)
         assert bit in (0, 1)
         self.cur_byte = (self.cur_byte << 1) | bit
         self.bits_in_cur_byte += 1
@@ -162,13 +173,13 @@ class ArithmeticDecoder(object):
                 self.bit_index = 0
             self.cur_ival_a = (self.cur_ival_a << 1) & 0xFF
             self.cur_ival_b = ((self.cur_ival_b << 1) & 0xFF) | 0x01
-            print (
-                "scaling      "
-                "old_a={:08b} old_b={:08b} new_a={:08b} new_b={:08b} "
-                "byte_i={} bit_i={}"
-                .format(
-                    old_a, old_b, self.cur_ival_a, self.cur_ival_b,
-                    self.byte_index, self.bit_index))
+            # print (
+            #     "scaling      "
+            #     "old_a={:08b} old_b={:08b} new_a={:08b} new_b={:08b} "
+            #     "byte_i={} bit_i={}"
+            #     .format(
+            #         old_a, old_b, self.cur_ival_a, self.cur_ival_b,
+            #         self.byte_index, self.bit_index))
 
         # Get the current encoded byte. The index is given by (byte_index,
         # bit_index), and in general it straddles two bytes.
@@ -188,12 +199,12 @@ class ArithmeticDecoder(object):
         else:
             decoded_bit = 1
             self.cur_ival_a, self.cur_ival_b = a1, b1
-        print (
-            "p0={} byte_i={} bit_i={} encoded_byte={:08b} "
-            "old_a={:08b} old_b={:08b} new_a={:08b} new_b={:08b}"
-            .format(
-                p0, self.byte_index, self.bit_index, encoded_byte,
-                old_a, old_b, self.cur_ival_a, self.cur_ival_b))
+        # print (
+        #     "p0={} byte_i={} bit_i={} encoded_byte={:08b} "
+        #     "old_a={:08b} old_b={:08b} new_a={:08b} new_b={:08b}"
+        #     .format(
+        #         p0, self.byte_index, self.bit_index, encoded_byte,
+        #         old_a, old_b, self.cur_ival_a, self.cur_ival_b))
 
         self._emit_bit(decoded_bit)
         return decoded_bit
@@ -201,7 +212,7 @@ class ArithmeticDecoder(object):
     def get_decoded_data(self):
         if not self.decoded_buffer:
             # If we have an incomplete byte, pad with zeros.
-            print "padding"
+            # print "padding"
             while self.bits_in_cur_byte:
                 self._emit_bit(0)
 
