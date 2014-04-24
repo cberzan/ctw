@@ -216,8 +216,6 @@ class WCTBinary(object):
             self.arr_lpe[node_id] = new_lpe
             self.arr_lpw[node_id] = new_lpw
 
-        # FIXME: need log probs
-
         return NodeParams(new_a, new_b, new_lpe, new_lpw)
 
     def get_p0(self, context):
