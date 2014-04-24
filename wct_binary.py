@@ -202,3 +202,11 @@ class WCTBinary(object):
         # FIXME: need log probs
 
         return NodeParams(new_a, new_b, new_pe, new_pw)
+
+    def get_p0(self, context):
+        """
+        Return conditional probability that next bit is zero.
+        """
+        dummy0 = self.update(context, 0, dry_run=True)
+        dummy1 = self.update(context, 1, dry_run=True)
+        return dummy0.pw / (dummy0.pw + dummy1.pw)

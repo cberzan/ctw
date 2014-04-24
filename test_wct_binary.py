@@ -71,3 +71,11 @@ def test_eidma_figure_3_2():
     nose.tools.assert_equal(nodes[11], Node('  0', 2, 2, 3. / 128, 11. / 256))
     nose.tools.assert_equal(nodes[12],
         Node('   ', 4, 3, 5. / 2048, 95. / 32768))
+
+
+
+def test_p0():
+    tree = WCTBinary(3)
+    context = [0, 1, 0]
+    p0 = tree.get_p0(context)
+    nose.tools.assert_almost_equal(p0, 0.5)
