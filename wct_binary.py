@@ -97,6 +97,19 @@ class WCTBinary(object):
             self.arr_pe[node_id], self.arr_pw[node_id]))
         return nodes
 
+    def update_many(self, context, bits):
+        """
+        Update tree sequentially with the given bits.
+
+        `context` is the context for the first bit.
+        """
+        assert bits
+        context = context[:]
+        for next_bit in bits:
+            result = self.update(context, next_bit)
+            context = context[1:] + [next_bit]
+        return result
+
     def update(self, context, next_bit, dry_run=False):
         """
         Update tree upon seeing next_bit after the given context.

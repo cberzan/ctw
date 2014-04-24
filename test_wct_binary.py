@@ -49,11 +49,7 @@ def test_eidma_figure_3_2():
     tree = WCTBinary(3)
     context = [0, 1, 0]
     bits = [0, 1, 1, 0, 1, 0, 0]
-    while bits:
-        next_bit = bits[0]
-        tree.update(context, next_bit)
-        context = context[1:] + [next_bit]
-        bits = bits[1:]
+    tree.update_many(context, bits)
     print tree
     nodes = tree.nodes_in_preorder()
     nose.tools.assert_equal(len(nodes), 13)
