@@ -1,5 +1,9 @@
+from collections import namedtuple
 from StringIO import StringIO
 import numpy as np
+
+
+NodeParams = namedtuple('NodeParams', ['a', 'b', 'pe', 'pw'])
 
 
 class Node(object):
@@ -115,7 +119,8 @@ class WCTBinary(object):
             # Non-leaf.
             child_bit = context.pop()
             child_id = self._get_or_create_child(node_id, child_bit)
-            child_params = self._update_rec(child_id, context, next_bit, dry_run)
+            child_params = self._update_rec(
+                child_id, context, next_bit, dry_run)
 
         # Now update this node.
         new_params = self._update_node(node_id, next_bit,
@@ -184,8 +189,8 @@ class WCTBinary(object):
             new_pw = new_pe
         else:
             # Non-leaf.
-            pw0 = child_params['pw'] if child_bit == 0 else self.get_pw(i0c, 1)
-            pw1 = child_params['pw'] if child_bit == 1 else self.get_pw(i1c, 1)
+            pw0 = child_params.pw if child_bit == 0 else self.get_pw(i0c, 1)
+            pw1 = child_params.pw if child_bit == 1 else self.get_pw(i1c, 1)
             new_pw = 0.5 * new_pe + 0.5 * pw0 * pw1
 
         if not dry_run:
@@ -196,4 +201,4 @@ class WCTBinary(object):
 
         # FIXME: need log probs
 
-        return {'a': new_a, 'b': new_b, 'pe': new_pe, 'pw': new_pw}
+        return NodeParams(new_a, new_b, new_pe, new_pw)
