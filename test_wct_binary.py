@@ -68,6 +68,27 @@ def test_eidma_figure_3_2():
     nose.tools.assert_equal(nodes[12],
         Node('   ', 4, 3, 5. / 2048, 95. / 32768))
 
+    p0 = tree.get_p0([1, 0, 0])
+    nose.tools.assert_almost_equal(p0, 0.42105263157894735)
+
+
+def test_dummy_updates():
+    tree = WCTBinary(3)
+    context = [0, 1, 0]
+    bits = [0, 1, 1, 0, 1, 0, 0]
+    tree.update_many(context, bits)
+
+    params = tree.update([1, 0, 0], 0, dry_run=True)
+    nose.tools.assert_equal(params.a, 5)
+    nose.tools.assert_equal(params.b, 3)
+    nose.tools.assert_almost_equal(params.pe, 0.001373291015625)
+    nose.tools.assert_almost_equal(params.pw, 0.001220703125)
+
+    params = tree.update([1, 0, 0], 1, dry_run=True)
+    nose.tools.assert_equal(params.a, 4)
+    nose.tools.assert_equal(params.b, 4)
+    nose.tools.assert_almost_equal(params.pe, 0.001068115234375)
+    nose.tools.assert_almost_equal(params.pw, 0.001678466796875)
 
 
 def test_p0():
