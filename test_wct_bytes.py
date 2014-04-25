@@ -55,8 +55,9 @@ def test_dry_run():
     nose.tools.assert_equal(new_params.lpw, np.log(1. / 256))
 
 
-def test_p0():
+def test_probs():
     tree = WCTBytes(3)
     context = [ord('a'), ord('b'), ord('c')]
     probs = tree.get_probs(context)
-    nose.tools.assert_almost_equal(probs, np.ones(256) / 256)
+    true_probs = np.ones(256) / 256
+    nose.tools.assert_true(np.sum(np.abs(probs - true_probs)) < 1e-6)

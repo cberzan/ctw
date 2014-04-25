@@ -115,7 +115,6 @@ class WCTBytes(object):
         """
         Update tree upon seeing next_byte after the given context.
         """
-        print "update({}, {}, {})".format(context, next_byte, dry_run)
         assert len(context) == self.depth
         return self._update_rec(self.root_id, context[:], next_byte, dry_run)
 
@@ -123,9 +122,6 @@ class WCTBytes(object):
         """
         Recursive helper for update().
         """
-        print "    _update_rec({}, {}, {}, {})".format(
-            node_id, context, next_byte, dry_run)
-
         # Recursively update the appropriate child.
         if not context:
             # Leaf.
@@ -142,7 +138,6 @@ class WCTBytes(object):
         # Now update this node.
         new_params = self._update_node(
             node_id, next_byte, child_byte, child_params, dry_run)
-        self._sanity_check(node_id)
         return new_params
 
     def _create_leaf(self):
@@ -165,22 +160,6 @@ class WCTBytes(object):
             child_id = self._create_leaf()
             child_arr[node_id] = child_id
         return child_arr[node_id]
-
-    def _sanity_check(self, node_id):
-        """
-        Assert invariants on the given node.
-        """
-        print "_sanity_check({})".format(node_id)
-        children = self.arr_children[node_id, :]
-        if all(children == self.NO_CHILD):
-            # Leaf.
-            pass
-        else:
-            # Non-leaf.
-            for byte in xrange(256):
-                assert (self.arr_counts[node_id, byte] ==
-                    sum(self.get_count(child, byte, 0) for child in children))
-            # FIXME: this is now inefficient since it sums over 256 values
 
     def _update_node(self, node_id, next_byte, child_byte, child_params,
                      dry_run=False):
@@ -226,8 +205,10 @@ class WCTBytes(object):
         Return probs s.t. probs[i] = cond prob of seeing next byte i.
         """
         # FIXME: inefficient as hell; does 256 dummy updates
+        # FIXME: also, do we need the node-params (with 256-count),
+        # or can we just return lpw?
         dummies = np.array([
-            self.update(context, byte, dry_run=True)
+            self.update(context, byte, dry_run=True).lpw
             for byte in xrange(256)])
         denom = reduce(np.logaddexp, dummies)
         return np.exp(dummies - denom)
