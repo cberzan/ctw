@@ -31,7 +31,7 @@ def split_interval(a, b, p0):
 
 class ArithmeticEncoder(object):
     """
-    Arithmetic encoder.
+    Arithmetic encoder that operates on bits.
 
     ```
     encoder = ArithmeticEncoder()
@@ -49,7 +49,7 @@ class ArithmeticEncoder(object):
         self.cur_byte = 0
         self.bits_in_cur_byte = 0
 
-        # current interval:
+        # current interval (resolution is 8 bits):
         self.cur_ival_a = 0
         self.cur_ival_b = 0xFF
 
@@ -118,7 +118,7 @@ class ArithmeticEncoder(object):
 
 class ArithmeticDecoder(object):
     """
-    Arithmetic decoder.
+    Arithmetic decoder that operates on bits.
 
     ```
     decoder = ArithmeticDecoder()
