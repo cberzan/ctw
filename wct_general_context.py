@@ -11,7 +11,7 @@ class WCTGeneralContextBinaryCounts(object):
     A weighted context tree that allows for an arbitrary context dictionary size
     but only keeps bit counts at each node.
     """
-    MAX_NODES = 2000000
+    MAX_NODES = 2000
     NO_CHILD = -1  # so we can store children indices in an int array
 
     def __init__(self, depth, context_syms=2):
