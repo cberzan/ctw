@@ -4,6 +4,7 @@ import numpy as np
 from wct_binary import Node
 from wct_binary import WCTBinary
 
+
 def make_node(path, a, b, pe, pw):
     return Node(path, a, b, np.log(pe), np.log(pw))
 
@@ -62,13 +63,15 @@ def test_eidma_figure_3_2():
     nose.tools.assert_equal(nodes[2],  make_node('101', 1, 0, 0.5, 0.5))
     nose.tools.assert_equal(nodes[3],  make_node('001', 0, 1, 0.5, 0.5))
     nose.tools.assert_equal(nodes[4],  make_node(' 01', 1, 1, 1. / 8, 3. / 16))
-    nose.tools.assert_equal(nodes[5],  make_node('  1', 2, 1, 1. / 16, 5. / 64))
+    nose.tools.assert_equal(nodes[5],
+        make_node('  1', 2, 1, 1. / 16, 5. / 64))
     nose.tools.assert_equal(nodes[6],  make_node('110', 0, 1, 0.5, 0.5))
     nose.tools.assert_equal(nodes[7],  make_node('010', 2, 0, 3. / 8, 3. / 8))
     nose.tools.assert_equal(nodes[8],  make_node(' 10', 2, 1, 1. / 16, 1. / 8))
     nose.tools.assert_equal(nodes[9],  make_node('100', 0, 1, 0.5, 0.5))
     nose.tools.assert_equal(nodes[10], make_node(' 00', 0, 1, 0.5, 0.5))
-    nose.tools.assert_equal(nodes[11], make_node('  0', 2, 2, 3. / 128, 11. / 256))
+    nose.tools.assert_equal(nodes[11],
+        make_node('  0', 2, 2, 3. / 128, 11. / 256))
     nose.tools.assert_equal(nodes[12],
         make_node('   ', 4, 3, 5. / 2048, 95. / 32768))
 
