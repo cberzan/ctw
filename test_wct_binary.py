@@ -3,6 +3,7 @@ import numpy as np
 
 from wct_binary import Node
 from wct_binary import WCTBinary
+from wct_general_context import WCTGeneralContextBinaryCounts
 
 def make_node(path, a, b, pe, pw):
     return Node(path, a, b, np.log(pe), np.log(pw))
@@ -28,6 +29,18 @@ def test_single_update():
     nose.tools.assert_equal(nodes[1], make_node(' 10', 1, 0, 0.5, 0.5))
     nose.tools.assert_equal(nodes[2], make_node('  0', 1, 0, 0.5, 0.5))
     nose.tools.assert_equal(nodes[3], make_node('   ', 1, 0, 0.5, 0.5))
+
+
+def test_single_update_multi_context():
+    tree = WCTGeneralContextBinaryCounts(3, context_syms=3)
+    tree.update([0, 2, 1], 0)
+    print tree
+    nodes = tree.nodes_in_preorder()
+    nose.tools.assert_equal(len(nodes), 4)
+    nose.tools.assert_equal(nodes[0], make_node('0 2 1', 1, 0, 0.5, 0.5))
+    nose.tools.assert_equal(nodes[1], make_node('  2 1', 1, 0, 0.5, 0.5))
+    nose.tools.assert_equal(nodes[2], make_node('    1', 1, 0, 0.5, 0.5))
+    nose.tools.assert_equal(nodes[3], make_node('     ', 1, 0, 0.5, 0.5))
 
 
 def test_dry_run():
