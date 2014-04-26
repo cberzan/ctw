@@ -1,6 +1,7 @@
 from wct_general_context import WCTGeneralContextBinaryCounts as WCT
 import numpy as np
 
+
 class WCTPhases(object):
     """
     Weighted context tree that operates with phases.

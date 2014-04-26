@@ -8,8 +8,8 @@ from wct_binary import NodeParams
 
 class WCTGeneralContextBinaryCounts(object):
     """
-    A weighted context tree that allows for an arbitrary context dictionary size
-    but only keeps bit counts at each node.
+    A weighted context tree that allows for an arbitrary context dictionary
+    size but only keeps bit counts at each node.
     """
     MAX_NODES = 2000
     NO_CHILD = -1  # so we can store children indices in an int array
@@ -61,15 +61,15 @@ class WCTGeneralContextBinaryCounts(object):
         Recursive helper for nodes_in_preorder().
         """
         nodes = []
-        maxstrlen = len(str(self.context_syms))
-        children = self.arr_children[node_id,:]
+        maxlen = len(str(self.context_syms))
+        children = self.arr_children[node_id, :]
         for s in range(self.context_syms)[::-1]:
             if children[s] == self.NO_CHILD:
                 continue
-            newpath = '{: <{width}} {}'.format(s, path, width=maxstrlen).strip()
+            newpath = '{: <{width}} {}'.format(s, path, width=maxlen).strip()
             nodes += self._nodes_rec(children[s], newpath)
         nodes.append(Node(
-            " " * ((maxstrlen+1) * self.depth - len(path) - 1) + path,
+            " " * ((maxlen+1) * self.depth - len(path) - 1) + path,
             self.arr_a[node_id], self.arr_b[node_id],
             self.arr_lpe[node_id], self.arr_lpw[node_id]))
         return nodes
@@ -101,7 +101,7 @@ class WCTGeneralContextBinaryCounts(object):
         # Recursively update the appropriate child.
         if not context:
             # Leaf.
-            assert all(self.arr_children[node_id,:] == self.NO_CHILD)
+            assert all(self.arr_children[node_id, :] == self.NO_CHILD)
             child_bit = None
             child_params = None
         else:
@@ -123,7 +123,7 @@ class WCTGeneralContextBinaryCounts(object):
         self.arr_b[self.next_id] = 0
         self.arr_lpe[self.next_id] = 0
         self.arr_lpw[self.next_id] = 0
-        self.arr_children[self.next_id,:] = self.NO_CHILD
+        self.arr_children[self.next_id, :] = self.NO_CHILD
         node_id = self.next_id
         self.next_id += 1
         return node_id
@@ -133,7 +133,7 @@ class WCTGeneralContextBinaryCounts(object):
         Return child_id for given node_id and bit.
         """
         assert context_sym in range(self.context_syms)
-        child_arr = self.arr_children[:,context_sym]
+        child_arr = self.arr_children[:, context_sym]
         if child_arr[node_id] == self.NO_CHILD:
             child_id = self._create_leaf()
             child_arr[node_id] = child_id
@@ -144,7 +144,7 @@ class WCTGeneralContextBinaryCounts(object):
         Assert invariants on the given node.
         """
         a, b = self.arr_a[node_id], self.arr_b[node_id]
-        children = self.arr_children[node_id,:]
+        children = self.arr_children[node_id, :]
         if all(children == self.NO_CHILD):
             # Leaf.
             pass
@@ -171,7 +171,7 @@ class WCTGeneralContextBinaryCounts(object):
             new_a, new_b = a, b + 1
 
         # Update lpw.
-        children = self.arr_children[node_id,:]
+        children = self.arr_children[node_id, :]
         if all(children == self.NO_CHILD):
             # Leaf.
             new_lpw = new_lpe
@@ -180,7 +180,7 @@ class WCTGeneralContextBinaryCounts(object):
             child_lpw_sum = 0
             for s in range(self.context_syms):
                 child_lpw_sum += child_params.lpw if child_bit == s else \
-                                 self.get_lpw(children[s], 0)
+                    self.get_lpw(children[s], 0)
             new_lpw = np.logaddexp(np.log(0.5) + new_lpe,
                                    np.log(0.5) + child_lpw_sum)
 
