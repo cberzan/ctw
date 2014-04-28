@@ -1,3 +1,5 @@
+import numpy as np
+
 from arenc import ArithmeticDecoder
 from arenc import ArithmeticEncoder
 from util import byte_bit
@@ -33,3 +35,17 @@ def decode(msg_len, enc_data, max_depth=3):
         tree.update(context, bit)
         context = context[1:] + [bit]
     return decoder.get_decoded_data()
+
+
+def compute_enc_bit_len(data, tree_class, max_depth=3):
+    """
+    Build tree and report the encoded bit length, -log2(root_pw).
+    """
+    tree = tree_class(max_depth)
+    context = tree.dummy_initial_context()
+    for piece in tree.data_to_pieces(data):
+        tree.update(context, piece)
+        context = context[1:] + [piece]
+    l2pw = tree.get_lpw(tree.root_id, None) / np.log(1)
+    print "tree l2pw is", l2pw
+    return l2pw
