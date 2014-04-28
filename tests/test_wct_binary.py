@@ -1,9 +1,9 @@
 import nose
 import numpy as np
 
-from wct_binary import Node
-from wct_binary import WCTBinary
-from wct_general_context import WCTGeneralContextBinaryCounts
+from ctw.wct_binary import Node
+from ctw.wct_binary import WCTBinary
+from ctw.wct_general_context import WCTGeneralContextBinaryCounts
 
 
 def make_node(path, a, b, pe, pw):

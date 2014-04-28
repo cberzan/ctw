@@ -1,8 +1,8 @@
 from textwrap import dedent
 import nose
 
-from ctw import decode
-from ctw import encode
+from ctw.ctw import decode
+from ctw.ctw import encode
 
 
 def test_small():
