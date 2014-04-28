@@ -1,0 +1,24 @@
+Thoreau quote, WCTBinary(max_depth=48), long contexts with occupancy >= 100:
+tree l2pw is -5947.8478526
+bits_per_byte 4.68703534484
+
+                                     00100000011: a=116 b=75 lpe=-130.809433183 lpw=-131.201868217
+                                     10010000001: a=6 b=94 lpe=-25.2333385745 lpw=-25.8032065598
+                                     00010000001: a=8 b=97 lpe=-30.8425378543 lpw=-23.1169352575
+                                    001000000110: a=65 b=51 lpe=-82.1629451853 lpw=-82.786531114
+                                      1001000000: a=0 b=100 lpe=-2.87620003071 lpw=-3.53605518283
+                                      0001000000: a=2 b=105 lpe=-12.5244855907 lpw=-13.0785700452
+
+Notice the 10000001 pattern -- it's the ASCII space (00100000) followed by some other
+ASCII symbol.
+
+Same as above, but scrambled:
+tree l2pw is -6862.89906861
+bits_per_byte 5.40811589331
+
+                                      1101011011: a=43 b=63 lpe=-74.1353786269 lpw=-59.0441184808
+                                      1110101101: a=4 b=99 lpe=-19.4698083653 lpw=-20.057483195
+                                      0100111010: a=63 b=38 lpe=-69.4173448725 lpw=-45.8891357818
+
+Notice compression ratio got worse. (Space got mapped to 11110101, which does
+not appear above)
