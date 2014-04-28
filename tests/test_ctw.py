@@ -3,6 +3,7 @@ import nose
 
 from ctw.ctw import decode
 from ctw.ctw import encode
+from ctw.ctw import enc_len
 
 
 def test_small():
@@ -25,3 +26,9 @@ def test_large():
     nose.tools.assert_equal(msg_len, msg_len_back)
     nose.tools.assert_equal(dec_data, plaintext)
     print len(plaintext), len(enc_data)
+
+
+def test_enc_len():
+    plaintext = "abracadabra"
+    bits = enc_len(plaintext)
+    nose.tools.assert_almost_equal(bits, 87.8383984894)

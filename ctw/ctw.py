@@ -38,6 +38,22 @@ def decode(msg_len, enc_data, max_depth=3):
     return decoder.get_decoded_data()
 
 
+def enc_len(data, max_depth=3):
+    """
+    Build WCTBinary and report the encoded bit length.
+    """
+    tree = WCTBinary(max_depth)
+    context = [0] * max_depth
+    for byte in data:
+        for i in xrange(8):
+            bit = byte_bit(ord(byte), i)
+            tree.update(context, bit)
+            context = context[1:] + [bit]
+    l2pw = tree.get_lpw(tree.root_id, None) / np.log(2)
+    print "tree l2pw is", l2pw
+    return -l2pw
+
+
 def encode_phases(data, max_depth=3):
     """
     Encode data using WCTPhases and return (msg_len, enc_data)
@@ -75,17 +91,3 @@ def decode_phases(msg_len, enc_data, max_depth=3):
             byte = (byte << 1) | bit
         context = context[1:] + [byte]
     return decoder.get_decoded_data()
-
-
-def compute_enc_bit_len(data, tree_class, max_depth=3):
-    """
-    Build tree and report the encoded bit length, -log2(root_pw).
-    """
-    tree = tree_class(max_depth)
-    context = tree.dummy_initial_context()
-    for piece in tree.data_to_pieces(data):
-        tree.update(context, piece)
-        context = context[1:] + [piece]
-    l2pw = tree.get_lpw(tree.root_id, None) / np.log(1)
-    print "tree l2pw is", l2pw
-    return l2pw
