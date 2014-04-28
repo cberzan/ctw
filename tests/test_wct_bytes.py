@@ -1,8 +1,8 @@
 import nose
 import numpy as np
 
-from wct_bytes import Node
-from wct_bytes import WCTBytes
+from ctw.wct_bytes import Node
+from ctw.wct_bytes import WCTBytes
 
 
 def make_node(path, counts_dict, pe, pw):
