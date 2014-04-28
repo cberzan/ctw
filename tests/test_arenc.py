@@ -1,11 +1,11 @@
 import nose
 import random
 
-from arenc import ArithmeticDecoder
-from arenc import ArithmeticEncoder
-from arenc import split_interval
-from util import byte_bit
-from util import pretty_bin_buffer
+from ctw.arenc import ArithmeticDecoder
+from ctw.arenc import ArithmeticEncoder
+from ctw.arenc import split_interval
+from ctw.util import byte_bit
+from ctw.util import pretty_bin_buffer
 
 
 def test_byte_bit():

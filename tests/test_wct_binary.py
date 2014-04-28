@@ -1,8 +1,9 @@
 import nose
 import numpy as np
 
-from wct_binary import Node
-from wct_binary import WCTBinary
+from ctw.wct_binary import Node
+from ctw.wct_binary import WCTBinary
+from ctw.wct_general_context import WCTGeneralContextBinaryCounts
 
 
 def make_node(path, a, b, pe, pw):
@@ -23,7 +24,7 @@ def test_single_update():
     tree = WCTBinary(3)
     tree.update([0, 1, 0], 0)
     print tree
-    nodes = tree.nodes_in_preorder()
+    nodes = tree.nodes_in_postorder()
     nose.tools.assert_equal(len(nodes), 4)
     nose.tools.assert_equal(nodes[0], make_node('010', 1, 0, 0.5, 0.5))
     nose.tools.assert_equal(nodes[1], make_node(' 10', 1, 0, 0.5, 0.5))
@@ -31,12 +32,24 @@ def test_single_update():
     nose.tools.assert_equal(nodes[3], make_node('   ', 1, 0, 0.5, 0.5))
 
 
+def test_single_update_multi_context():
+    tree = WCTGeneralContextBinaryCounts(3, context_syms=3)
+    tree.update([0, 2, 1], 0)
+    print tree
+    nodes = tree.nodes_in_postorder()
+    nose.tools.assert_equal(len(nodes), 4)
+    nose.tools.assert_equal(nodes[0], make_node('0 2 1', 1, 0, 0.5, 0.5))
+    nose.tools.assert_equal(nodes[1], make_node('  2 1', 1, 0, 0.5, 0.5))
+    nose.tools.assert_equal(nodes[2], make_node('    1', 1, 0, 0.5, 0.5))
+    nose.tools.assert_equal(nodes[3], make_node('     ', 1, 0, 0.5, 0.5))
+
+
 def test_dry_run():
     tree = WCTBinary(3)
     new_params = tree.update([0, 1, 0], 0, dry_run=True)
     print new_params
     print tree
-    nodes = tree.nodes_in_preorder()
+    nodes = tree.nodes_in_postorder()
     # first make sure we didn't mess with the tree at all
     nose.tools.assert_equal(len(nodes), 4)
     nose.tools.assert_equal(nodes[0], make_node('010', 0, 0, 1, 1))
@@ -56,7 +69,7 @@ def test_eidma_figure_3_2():
     bits = [0, 1, 1, 0, 1, 0, 0]
     tree.update_many(context, bits)
     print tree
-    nodes = tree.nodes_in_preorder()
+    nodes = tree.nodes_in_postorder()
     nose.tools.assert_equal(len(nodes), 13)
     nose.tools.assert_equal(nodes[0],  make_node('011', 1, 0, 0.5, 0.5))
     nose.tools.assert_equal(nodes[1],  make_node(' 11', 1, 0, 0.5, 0.5))

@@ -5,13 +5,10 @@ Read stdin, scramble it through a 1-1 byte mapping, and write to stdout.
 
 Usage:
     ./scramble.py <in.txt >out.txt
-
-Note: Does not work in PyPy because numpy.random.permutation is not
-implemented.
 """
 
 
-import numpy as np
+import random
 import sys
 
 
@@ -50,9 +47,10 @@ def mapping_from_seed(seed):
     """
     Return a random mapping obtained using the given seed.
     """
-    np.random.seed(seed)
+    random.seed(seed)
     keys = range(256)
-    values = np.random.permutation(keys)
+    values = range(256)
+    random.shuffle(values)
     return dict((k, v) for k, v in zip(keys, values))
 
 

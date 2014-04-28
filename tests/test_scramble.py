@@ -1,8 +1,8 @@
 import nose
 
-from scramble import mapping_from_seed
-from scramble import scramble
-from scramble import unscramble
+from ctw.scramble import mapping_from_seed
+from ctw.scramble import scramble
+from ctw.scramble import unscramble
 
 
 def test_scramble():
