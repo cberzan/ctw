@@ -46,19 +46,19 @@ class WCTGeneralContextBinaryCounts(object):
 
     def __str__(self):
         stream = StringIO()
-        for node in self.nodes_in_preorder():
+        for node in self.nodes_in_postorder():
             print >>stream, node
         return stream.getvalue()
 
-    def nodes_in_preorder(self):
+    def nodes_in_postorder(self):
         """
-        Return list of Nodes in preorder (1 child, then 0 child, then self).
+        Return list of Nodes in postorder (1 child, then 0 child, then self).
         """
         return self._nodes_rec(self.root_id, "")
 
     def _nodes_rec(self, node_id, path):
         """
-        Recursive helper for nodes_in_preorder().
+        Recursive helper for nodes_in_postorder().
         """
         nodes = []
         maxlen = len(str(self.context_syms))
