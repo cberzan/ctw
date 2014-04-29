@@ -51,7 +51,7 @@ def enc_len(data, max_depth=3):
             tree.update(context, bit)
             context = context[1:] + [bit]
     l2pw = tree.get_lpw(tree.root_id, None) / np.log(2)
-    print "tree l2pw is", l2pw
+    # print "tree l2pw is", l2pw
     return -l2pw
 
 
@@ -107,9 +107,12 @@ def enc_len_phases(data, max_depth=3):
             tree.update(context, phase, bit)
             phase += (bit,)
         context = context[1:] + [ord(byte)]
-    print "tree size is", sum(t.next_id for t in tree.phase_trees.values())
-    raise NotImplementedError()
-    # FIXME: No idea what's the probability of the whole sequence...
+    # print "tree size is", sum(t.next_id for t in tree.phase_trees.values())
+    l2pw = sum(
+        tree.get_lpw(tree.root_id, None)
+        for tree in tree.phase_trees.itervalues()) / np.log(2)
+    # print "sum l2pw is", l2pw
+    return -l2pw
 
 
 def encode_bytes(data, max_depth=3):
