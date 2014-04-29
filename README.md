@@ -1,11 +1,11 @@
 Final project for UC Berkeley CS281B, Statistical Learning Theory, spring 2014,
 by Constantin Berzan and Eric Tzeng. The driving question was: Why did the
 authors of CTW use [the concept of
-phases][http://www.ele.tue.nl/ctw/overview/structure.html] to organize their
+phases](http://www.ele.tue.nl/ctw/overview/structure.html) to organize their
 trees?
 
 Note: The CTW algorithm is unfortunately [patent
-encumbered][http://www.ele.tue.nl/ctw/ipr.html].
+encumbered](http://www.ele.tue.nl/ctw/ipr.html).
 
 
 ## Setup
