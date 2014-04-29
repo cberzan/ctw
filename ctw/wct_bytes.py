@@ -45,7 +45,7 @@ class WCTBytes(object):
     """
     Weighted context tree with bytes on edges and byte counts at the nodes.
     """
-    MAX_NODES = 2000
+    MAX_NODES = 20000
     NO_CHILD = -1  # so we can store children indices in an int array
 
     def __init__(self, depth):

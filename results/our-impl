@@ -1,6 +1,9 @@
-WCTBinary  on plain     : 5947.8478526  bits total; 743.480981576 bytes; 4.68703534484 bits / byte
-WCTPhases  on plain     : 4951.01165859 bits total; 618.876457324 bytes; 3.90150642915 bits / byte
-WCTBinary  on scrambled : 6862.89906861 bits total; 857.862383576 bytes; 5.40811589331 bits / byte
-WCTPhases  on scrambled : 5225.4439584  bits total; 653.1804948 bytes; 4.11776513664 bits / byte
-WCTBinary  on misaligned: 5887.85048702 bits total; 735.981310877 bytes; 4.63975609694 bits / byte
-WCTPhases  on misaligned: 8720.50559224 bits total; 1090.06319903 bytes; 6.87195082131 bits / byte
+WCTBinary  on plain     : total 5947.8478526 bits or 743.480981576 bytes; 4.68703534484 bits / byte
+WCTPhases  on plain     : total 4951.01165859 bits or 618.876457324 bytes; 3.90150642915 bits / byte
+WCTBytes   on plain     : total 5856.21461574 bits or 732.026826968 bytes; 4.61482633234 bits / byte
+WCTBinary  on scrambled : total 6862.89906861 bits or 857.862383576 bytes; 5.40811589331 bits / byte
+WCTPhases  on scrambled : total 5225.4439584 bits or 653.1804948 bytes; 4.11776513664 bits / byte
+WCTBytes   on scrambled : total 5856.21461574 bits or 732.026826968 bytes; 4.61482633234 bits / byte
+WCTBinary  on misaligned: total 5887.85048702 bits or 735.981310877 bytes; 4.63975609694 bits / byte
+WCTPhases  on misaligned: total 8720.50559224 bits or 1090.06319903 bytes; 6.87195082131 bits / byte
+WCTBytes   on misaligned: total 9453.86931925 bits or 1181.73366491 bytes; 7.44985761958 bits / byte

@@ -142,5 +142,5 @@ def enc_len_bytes(data, max_depth=3):
         tree.update(context, byte)
         context = context[1:] + [byte]
     l2pw = tree.get_lpw(tree.root_id, None) / np.log(2)
-    print "tree l2pw is", l2pw
+    # print "tree l2pw is", l2pw
     return -l2pw

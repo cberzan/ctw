@@ -1,6 +1,7 @@
 from functools import partial
 
 from ctw.ctw import enc_len
+from ctw.ctw import enc_len_bytes
 from ctw.ctw import enc_len_phases
 from ctw.misalign import add_leading_0_bit
 from ctw.scramble import mapping_from_seed
@@ -19,7 +20,10 @@ if __name__ == "__main__":
             (misaligned_plaintext, "misaligned")):
         for enc_len_func, alg_desc in (
                 (partial(enc_len, max_depth=48), "WCTBinary"),
-                (partial(enc_len_phases, max_depth=6), "WCTPhases")):
+                (partial(enc_len_phases, max_depth=6), "WCTPhases"),
+                (partial(enc_len_bytes, max_depth=6), "WCTBytes")):
             bits = enc_len_func(text)
-            print "{:10} on {:10}: {} bits total; {} bytes; {} bits / byte".format(
-                alg_desc, text_desc, bits, bits / 8, bits / len(plaintext))
+            print (
+                "{:10} on {:10}: total {} bits or {} bytes; {} bits / byte"
+                .format(alg_desc, text_desc, bits, bits / 8,
+                        bits / len(plaintext)))
