@@ -1,0 +1,7 @@
+*-blx.bib
+*.bbl
+*.blg
+*.b
+*.out
+report.pdf
+*.run.xml

@@ -1,0 +1,126 @@
+\documentclass[11pt]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage[cm]{fullpage}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{biblatex}
+\usepackage{subcaption}
+
+\renewcommand{\bibfont}{\footnotesize}
+%\pagenumbering{gobble}
+\usepackage{hyperref}
+\addbibresource{report.bib}
+
+\title{An Investigation of Phases in Context Tree Weighting}
+\subtitle{CS281B: Final Project Report}
+\author{Constantin Berzan (joint work with Eric Tzeng)}
+\date{May 1, 2014}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+TODO
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Binary Weighted Context Tree}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Weighted Context Tree with Phases}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Weighted Context Tree on Bytes}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Plaintext Transformations}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results and Discussion}
+
+We ran experiments on an English text document of 1270 characters. (It is the
+first paragraph from Harlan Ellison's short story, {\em ``Repent, Harlequin!''
+Said the Ticktockman}, which is in turn a quotation from Henry David Thoreau's
+essay, {\em Civil Disobedience}.)
+
+We validated our implementation in two ways: First, we verified that encoding
+and then decoding the text produced the original text back. Second, we verified
+that our implementation of WCTPhases obtained the same compression ratio as the
+official CTW implementation run with the KT estimator. Thus, we are confident
+that our implementation of WCTPhases is equivalent to the official CTW
+implementation.
+
+Our implementation was not nearly as fast as the official CTW implementation.
+Encoding and decoding our example text took 5.8 seconds with WCTBinary, and
+21.5 seconds with WCTPhases. The official CTW implementation took 0.05 seconds
+for the same task (430 times faster than WCTPhases). These runtimes are
+reported for a modern laptop with a 2.9 GHz CPU. The official CTW
+implementation is written in C and includes multiple optimizations for speed
+(single-path pruning, pre-computed logarithm tables, and a more advanced
+arithmetic encoder). In our Python implementation, we focused on simplicity and
+easy experimentation, rather than speed.
+
+For our main experiment, we compared the compression ratio obtained by
+WCTBinary, WCTPhases, and WCTBytes on the original text, a scrambled version of
+the original text, and a misaligned version of the original text. All trees
+were configured with a depth of 6 bytes, or 48 bits, which is the default value
+used in the official CTW implementation. Table \ref{tab:results} summarizes our
+results.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{l|lll}
+        & plain text & scrambled text & misaligned text \\
+        \hline
+        WCTBinary & 4.69 bits/byte & 5.41 bits/byte & 4.64 bits/byte \\
+        WCTPhases & 3.90 bits/byte & 4.12 bits/byte & 6.87 bits/byte \\
+        WCTBytes  & 4.61 bits/byte & 4.61 bits/byte & 7.45 bits/byte \\
+    \end{tabular}
+    \caption{Compression ratio for the various algorithms and plaintext
+    transformations.}
+    \label{tab:results}
+\end{table}
+
+WCTBinary did equally well for the plain text and the misaligned text, but it
+did poorly on the scrambled text. This tells us that WCTBinary takes advantage
+of the locality of ASCII, but does not take advantage of byte-oriented data.
+
+WCTPhases did comparably well for the plain text and the scrambled text, but it
+did much worse on the misaligned text. This tells us that WCTPhases does not
+rely on locality as much, but it does rely heavily on byte-oriented data.
+
+WCTBytes was unaffected by scrambling at all, but it did much worse on
+misaligned text. This was to be expected, since out of all three methods,
+WCTBytes is the most reliant on byte-oriented data.
+
+We verified that the results we just presented hold for other English text
+documents of similar length. For longer documents, the compression ratios are
+better, but the effect of scrambling and misalignment remain qualitatively the
+same.
+
+% TODO: other things to maybe talk about:
+% - space symbol appearing in WCTBinary in different nodes
+% - WCTPhases predicts the first bit of ASCII chars for free (always 0)
+% - experiments with changing the weighting
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion and Future Work}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\printbibliography
+
+
+\end{document}
