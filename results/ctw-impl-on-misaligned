@@ -1,0 +1,11 @@
+$ ../ctw_baseline/ctw e thoreau-quote.txt thoreau-quote.txt.ctw
+compression-rate = 3.90623 bits/byte
+
+$ ../ctw_baseline/ctw e thoreau-quote.txt.mis thoreau-quote.txt.mis.ctw
+compression-rate = 5.95101 bits/byte
+
+$ ../ctw_baseline/ctw e dorian-gray.txt dorian-gray.txt.ctw
+compression-rate = 2.04995 bits/byte
+
+$ ../ctw_baseline/ctw e dorian-gray.txt.mis dorian-gray.txt.mis.ctw
+compression-rate = 2.38211 bits/byte

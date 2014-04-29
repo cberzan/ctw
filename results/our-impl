@@ -1,0 +1,6 @@
+WCTBinary  on plain     : 5947.8478526 bits total; 4.68703534484 bits / byte
+WCTPhases  on plain     : 4951.01165859 bits total; 3.90150642915 bits / byte
+WCTBinary  on scrambled : 6862.89906861 bits total; 5.40811589331 bits / byte
+WCTPhases  on scrambled : 5225.4439584 bits total; 4.11776513664 bits / byte
+WCTBinary  on misaligned: 5887.85048702 bits total; 4.63975609694 bits / byte
+WCTPhases  on misaligned: 8720.50559224 bits total; 6.87195082131 bits / byte
