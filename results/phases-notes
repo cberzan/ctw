@@ -1,0 +1,29 @@
+Thoreau quote, WCTPhases(max_depth=6):
+
+phase=() tree_size=4290 root=1269/0 root_lpw=-4.8386028601
+phase=(0,) tree_size=4290 root=275/994 root_lpw=-465.060785388
+phase=(0, 0) tree_size=977 root=20/255 root_lpw=-75.4050759123
+phase=(0, 1) tree_size=3423 root=17/977 root_lpw=-90.3910816285
+
+tree l2pw is -4951.01165859
+bits_per_byte 3.90150642915
+
+But these roots being "clean" doesn't mean the trees underneath are "clean".
+It just means that the next bit is "clean".
+
+phase=(0, 1) tree_size=3423 root=17/977 root_lpw=-90.3910816285
+phase=(0, 1, 1) tree_size=3357 root=635/342 root_lpw=-583.469543016
+
+------------------------------------------
+Same as above, but scrambled:
+
+phase=() tree_size=4290 root=382/887 root_lpw=-709.288309212
+phase=(0,) tree_size=1476 root=187/195 root_lpw=-234.694282342
+phase=(0, 0) tree_size=770 root=16/171 root_lpw=-58.1691992268
+phase=(0, 1) tree_size=789 root=159/36 root_lpw=-91.9295237742
+phase=(1,) tree_size=3103 root=394/493 root_lpw=-539.689916791
+phase=(1, 0) tree_size=1541 root=119/275 root_lpw=-233.261199475
+phase=(1, 1) tree_size=1792 root=71/422 root_lpw=-185.762888085
+
+tree l2pw is -5225.4439584
+bits_per_byte 4.11776513664
