@@ -1,0 +1,6 @@
+$ ../ctw_baseline/ctw e -k thoreau-quote.txt thoreau-quote.txt.ctw
+compression-rate = 3.91962 bits/byte
+$ ../ctw_baseline/ctw e -k thoreau-quote.txt.scr thoreau-quote.txt.scr.ctw
+compression-rate = 4.13780 bits/byte
+$ ../ctw_baseline/ctw e -k thoreau-quote.txt.mis thoreau-quote.txt.mis.ctw
+compression-rate = 6.12736 bits/byte
