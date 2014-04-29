@@ -21,5 +21,5 @@ if __name__ == "__main__":
                 (partial(enc_len, max_depth=48), "WCTBinary"),
                 (partial(enc_len_phases, max_depth=6), "WCTPhases")):
             bits = enc_len_func(text)
-            print "{:10} on {:10}: {} bits total; {} bits / byte".format(
-                alg_desc, text_desc, bits, bits / len(plaintext))
+            print "{:10} on {:10}: {} bits total; {} bytes; {} bits / byte".format(
+                alg_desc, text_desc, bits, bits / 8, bits / len(plaintext))
