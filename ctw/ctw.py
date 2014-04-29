@@ -55,11 +55,11 @@ def enc_len(data, max_depth=3):
     return -l2pw
 
 
-def encode_phases(data, max_depth=3):
+def encode_phases(data, max_depth=3, weight=0.5):
     """
     Encode data using WCTPhases and return (msg_len, enc_data)
     """
-    tree = WCTPhases(max_depth)
+    tree = WCTPhases(max_depth, lpw_weight=weight)
     encoder = ArithmeticEncoder()
     context = [0] * max_depth
     for byte in data:

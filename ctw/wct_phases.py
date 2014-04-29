@@ -13,14 +13,16 @@ class WCTPhases(object):
     Still need more specifics? So demanding. Read:
     http://www.ele.tue.nl/ctw/overview/structure.html
     """
-    def __init__(self, max_depth, context_syms=256):
+    def __init__(self, max_depth, context_syms=256, lpw_weight=0.5):
         self.depth = max_depth
         self.context_syms = context_syms
+        self.lpw_weight = lpw_weight
         self.phase_trees = {}
 
     def update(self, context, phase, next_bit, dry_run=False):
         if phase not in self.phase_trees:
-            self.phase_trees[phase] = WCT(self.depth, self.context_syms)
+            self.phase_trees[phase] = WCT(self.depth, self.context_syms,
+                                          lpw_weight=self.lpw_weight)
         tree = self.phase_trees[phase]
         return tree.update(context, next_bit, dry_run)
 

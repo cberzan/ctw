@@ -14,9 +14,10 @@ class WCTGeneralContextBinaryCounts(object):
     MAX_NODES = 20000
     NO_CHILD = -1  # so we can store children indices in an int array
 
-    def __init__(self, depth, context_syms=2):
+    def __init__(self, depth, context_syms=2, lpw_weight=0.5):
         self.depth = depth
         self.context_syms = context_syms
+        self.lpw_weight = lpw_weight
         self.arr_a = np.zeros(self.MAX_NODES, dtype=np.int)
         self.arr_b = np.zeros(self.MAX_NODES, dtype=np.int)
         self.arr_lpe = np.zeros(self.MAX_NODES)
@@ -181,8 +182,8 @@ class WCTGeneralContextBinaryCounts(object):
             for s in range(self.context_syms):
                 child_lpw_sum += child_params.lpw if child_bit == s else \
                     self.get_lpw(children[s], 0)
-            new_lpw = np.logaddexp(np.log(0.5) + new_lpe,
-                                   np.log(0.5) + child_lpw_sum)
+            new_lpw = np.logaddexp(np.log(self.lpw_weight) + new_lpe,
+                                   np.log(1 - self.lpw_weight) + child_lpw_sum)
 
         if not dry_run:
             self.arr_a[node_id] = new_a
