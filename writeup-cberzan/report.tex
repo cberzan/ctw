@@ -1,7 +1,6 @@
 \documentclass[11pt]{scrartcl}
 
 \usepackage[utf8]{inputenc}
-\usepackage[cm]{fullpage}
 \usepackage{amsmath}
 \usepackage{biblatex}
 \usepackage{caption}
@@ -65,7 +64,7 @@ these transformations in pseudocode.
     \begin{subfigure}[b]{0.45\textwidth}
 \begin{verbatim}
 def scramble(input):
-    mapping = random_permutation(256)
+    mapping = rand_permut(256)
     for char in input:
         output mapping[char] \end{verbatim}
         \caption{Scrambling transformation}
