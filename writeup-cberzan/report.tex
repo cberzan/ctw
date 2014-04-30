@@ -3,10 +3,10 @@
 \usepackage[utf8]{inputenc}
 \usepackage[cm]{fullpage}
 \usepackage{amsmath}
+\usepackage{biblatex}
 \usepackage{caption}
 \usepackage{float}
 \usepackage{graphicx}
-\usepackage{biblatex}
 \usepackage{subcaption}
 
 \renewcommand{\bibfont}{\footnotesize}
@@ -31,19 +31,58 @@ TODO
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{The Binary Weighted Context Tree}
+\section{The Binary Weighted Context Tree (WCTBinary)}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{The Weighted Context Tree with Phases}
+\section{The Weighted Context Tree with Phases (WCTPhases)}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{The Weighted Context Tree on Bytes}
+\section{The Weighted Context Tree on Bytes (WCTBytes)}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Plaintext Transformations}
+
+English text represented in ASCII exhibits two properties that might be
+exploited by a compression algorithm: locality and byte alignment. Locality
+means that commonly used characters have similar representations (the
+lower-case letters range from {\tt 01100001} to {\tt 01111010}, and the
+upper-case letters range from {\tt 01000001} to {\tt 01011010}). Byte alignment
+means that each character is represented as exactly one byte.
+
+To investigate how much our compression algorithms rely on these properties, we
+devised two simple transformations that disrupt these properties. The {\bf
+scrambling} transformation passes the text through a random 1-1 mapping from
+bytes to bytes, thus disrupting locality. The {\bf misaligning} transformation
+prepends a zero bit to every byte, thus making each character occupy nine bits,
+and disrupting byte alignment. Figure \ref{fig:transformations} summarizes
+these transformations in pseudocode.
+
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+\begin{verbatim}
+def scramble(input):
+    mapping = random_permutation(256)
+    for char in input:
+        output mapping[char] \end{verbatim}
+        \caption{Scrambling transformation}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.45\textwidth}
+\begin{verbatim}
+def misalign(input):
+    for byte in input:
+        output 0
+        output all bits of byte \end{verbatim}
+        \caption{Misaligning transformation}
+    \end{subfigure}
+    \caption{Pseudocode for the plaintext transformations.}
+    \label{fig:transformations}
+\end{figure}
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -94,15 +133,15 @@ results.
 
 WCTBinary did equally well for the plain text and the misaligned text, but it
 did poorly on the scrambled text. This tells us that WCTBinary takes advantage
-of the locality of ASCII, but does not take advantage of byte-oriented data.
+of the locality of ASCII, but does not take advantage of byte-aligned data.
 
 WCTPhases did comparably well for the plain text and the scrambled text, but it
 did much worse on the misaligned text. This tells us that WCTPhases does not
-rely on locality as much, but it does rely heavily on byte-oriented data.
+rely on locality as much, but it does rely heavily on byte-aligned data.
 
 WCTBytes was unaffected by scrambling at all, but it did much worse on
 misaligned text. This was to be expected, since out of all three methods,
-WCTBytes is the most reliant on byte-oriented data.
+WCTBytes is the most reliant on byte-aligned data.
 
 We verified that the results we just presented hold for other English text
 documents of similar length. For longer documents, the compression ratios are
