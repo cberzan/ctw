@@ -36,6 +36,115 @@ the CTW algorithm. This document reports our experiments and results.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Binary Weighted Context Tree (WCTBinary)}
 
+The Binary Weighted Context Tree is a complete binary tree of a pre-specified
+depth. Each node $s$ represents a context, which is a sequence of bits. If the
+node $s$ is a leaf, then it has no children. Otherwise, the node $s$ has two
+children, $0s$ and $1s$, obtained by prepending an additional bit of context.
+We use $\lambda$ to denote the root node, which represents an empty context.
+
+In the implementation, we only allocate memory for the nodes that correspond to
+contexts that have been seen at least once. Each node stores four values: $a$,
+$b$, $P_e$, and $P_w$. We use a superscript to denote which node we are
+referring to. $a$ and $b$ are the number of zero and one bits seen in the
+node's context. $P_e$ is the probability given by the KT estimator for $a$ and
+$b$, i.e. $P_e^s = P_{KT}(a^s, b^s)$. $P_{KT}$ is given by the following
+recurrence:
+
+\begin{align*}
+P_{KT}(0, 0)   &= 1 \\
+P_{KT}(a, b+1) &= P_{KT}(a, b) \frac{b + 1/2}{a + b + 1} \\
+P_{KT}(a+1, b) &= P_{KT}(a, b) \frac{a + 1/2}{a + b + 1}
+\end{align*}
+\
+$P_w$ is a weighting of the probability at this node and the probability at the
+children:
+
+\[
+P_w^s =
+\left\{
+\begin{array}{ll}
+\frac{1}{2} P_e^s + \frac{1}{2} P_w^{0s} P_w^{1s}
+    & \mbox{if $s$ is not a leaf} \\
+\phantom{\frac{1}{2}} P_e^s
+    & \mbox{if $s$ is a leaf}
+\end{array}
+\right.
+\]
+
+The best way to grasp context trees is by example. Figure \ref{fig:bin-tree}
+shows the example tree from \textcite{eidma}. This tree was constructed from
+the sequence $x_{1:T} = 0110100$, with initial context $...010$ and a depth of
+3.  The circled node represents context $s = 10$, and has two children: $0s =
+010$ and $1s = 110$. The circled node has $a = 2$ and $b = 1$, meaning that we
+have seen the sequence $s0 = 100$ two times, and the sequence $s1 = 101$ one
+time.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=12cm]{eidma-fig-3-2-ed.png}
+    \caption{Example binary weighted context tree from \textcite{eidma}.}
+    \label{fig:bin-tree}
+\end{figure}
+
+How do we update this tree? Suppose the next symbol is $x_{T+1} = 0$. The
+context is $x_{T-2:T} = 100$. We simply locate the leaf node $100$, increment
+$a$ because we saw a zero, and update $P_e$ and $P_w$ according to their
+definitions. We then update $a$, $b$, $P_e$, and $P_w$ for all the nodes on the
+path from the leaf node to the root.
+
+How do we use this tree for compression? At any point, the root weighted
+probability $P_w^\lambda$ represents the probability that the tree assigns to
+the sequence of bits seen so far, i.e. $P(x_{1:t})$. For the encoder, we need
+the conditional probability that the next bit is a zero:
+$P(x_{t+1} = 0 | x_{1:t})$. (The probability that the next bit is a one is just
+$P(x_{t+1} = 1 | x_{1:t}) = 1 - P(x_{t+1} = 0 | x_{1:t})$.)
+To obtain this conditional probability, we do a
+``dummy 0 update'' to get $P(x_{1:t}, x_{t+1} = 0)$, and then compute
+\[
+P(x_{t+1} = 0 | x_{1:t}) = \frac{ P(x_{1:t}, x_{t+1} = 0) }{ P(x_{1:t}) }.
+\]
+A ``dummy 0 update'' means that we traverse the tree and update $P_w^\lambda$
+as if seeing that the next bit is a zero, but without actually making any
+changes to the tree. Figure \ref{fig:enc-dec} shows the top-level encoding and
+decoding loops in pseudocode. Since the tree receives the same sequence of
+updates during encoding and decoding, the sequence of probabilities sent to the
+encoder and decoder is consistent.
+
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}[b]{0.5\textwidth}
+\begin{verbatim}
+def encode(data, max_depth):
+    tree = WCTBinary(max_depth)
+    encoder = ArithmeticEncoder()
+    context = [0, 0, ..., 0]
+    for bit in data:
+        p0 = tree.get_p0(context)
+        encoder.encode_bit(p0, bit)
+        tree.update(context, bit)
+        context = context[1:] + [bit]
+    encoder.finalize() \end{verbatim}
+        \caption{Encoding}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.45\textwidth}
+\begin{verbatim}
+def decode(enc_data, max_depth):
+    tree = WCTBinary(max_depth)
+    decoder = ArithmeticDecoder(enc_data)
+    context = [0, 0, ..., 0]
+    for i in range(msg_len):
+        p0 = tree.get_p0(context)
+        bit = decoder.decode_bit(p0)
+        tree.update(context, bit)
+        context = context[1:] + [bit]
+    decoder.finalize() \end{verbatim}
+        \caption{Decoding}
+    \end{subfigure}
+    \caption{Pseudocode for encoding and decoding.}
+    \label{fig:enc-dec}
+\end{figure}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Weighted Context Tree with Phases (WCTPhases)}
