@@ -36,11 +36,12 @@ the CTW algorithm. This document reports our experiments and results.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Binary Weighted Context Tree (WCTBinary)}
 
-The Binary Weighted Context Tree is a complete binary tree of a pre-specified
-depth. Each node $s$ represents a context, which is a sequence of bits. If the
-node $s$ is a leaf, then it has no children. Otherwise, the node $s$ has two
-children, $0s$ and $1s$, obtained by prepending an additional bit of context.
-We use $\lambda$ to denote the root node, which represents an empty context.
+The Binary Weighted Context Tree (WCTBinary) is a complete binary tree of a
+pre-specified depth. Each node $s$ represents a context, which is a sequence of
+bits. If the node $s$ is a leaf, then it has no children. Otherwise, the node
+$s$ has two children, $0s$ and $1s$, obtained by prepending an additional bit
+of context.  We use $\lambda$ to denote the root node, which represents an
+empty context.
 
 In the implementation, we only allocate memory for the nodes that correspond to
 contexts that have been seen at least once. Each node stores four values: $a$,
@@ -145,9 +146,45 @@ def decode(enc_data, max_depth):
     \label{fig:enc-dec}
 \end{figure}
 
+% TODO: talk about the probability of the whole sequence?
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Weighted Context Tree with Phases (WCTPhases)}
+
+The Weighted Context Tree with Phases (WCTPhases) is an ensemble of context
+trees. We have a total of $1 + 2 + ... + 128 = 255$ trees, one corresponding to
+each possible prefix within a byte. Let $x_{i,j}$ denote the j-th bit of the
+i-th byte of the input sequence.  When processing $x_{i,j}$, we select the tree
+corresponding to the previous bits in the current byte: $x_{i,1}, ...,
+x_{i,j-1}$. The context now consists of the previous {\em bytes}, so all the
+trees are 256-ary, not binary. But each tree still predicts only the
+probability of the next bit. Each node stores $a$, $b$, $P_e$, and $P_w$, as
+before, except that $P_w$ is now computed as
+
+\[
+P_w^s =
+\left\{
+\begin{array}{ll}
+\frac{1}{2} P_e^s + \frac{1}{2} \prod_{i=0}^{255}{ P_w^{i,s} }
+    & \mbox{if $s$ is not a leaf} \\
+\phantom{\frac{1}{2}} P_e^s
+    & \mbox{if $s$ is a leaf}
+\end{array}
+\right.
+\]
+
+Since we have 255 trees instead of one, it is no longer obvious what the
+probability of the whole sequence is. It turns out that this probability is
+just the product of $P_w$ values at the root of every tree:
+\[
+P(x_{1:T}) = \prod_{n=1}^{255} P_{w, n}^\lambda
+\]
+where $n$ ranges over all trees (the empty prefix, then the prefixes $0$ and
+$1$, then the prefixes $00$, $01$, $10$, $11$, then all prefixes of length 3,
+and so on). This fact can be seen by writing out the probability of the whole
+sequence as a product of conditional probabilities, and factoring the
+conditional probabilities according to the tree that they contribute to.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
