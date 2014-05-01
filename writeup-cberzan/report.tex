@@ -190,6 +190,24 @@ conditional probabilities according to the tree that they contribute to.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Weighted Context Tree on Bytes (WCTBytes)}
 
+The Weighted Context Tree on Bytes (WCTBytes) is a straightforward extension of
+WCTBinary to bytes. In particular, the context is now a sequence of bytes, not
+bits, and the tree now predicts the next byte, not the next bit. Each node
+stores the symbol counts $n_0, ..., n_{255}$, and the probabilities $P_e$ and
+$P_w$. $P_w$ is computed in the same way as in WCTPhases. $P_e$ is an
+extension of KT to 256 symbols:
+\[
+P_e(n_0, ..., n_i + 1, ..., n_{256}) =
+P_e(n_0, ..., n_i, ..., n_{256})
+\frac{ n_i + 1/2 }{ n_0 + ... + n_{256} + 128 }.
+\]
+
+Using WCTBytes for compression requires a more complicated arithmetic encoder:
+one that encodes one byte at a time, rather than one bit at a time. But to
+evaluate the compression ratio of WCTBytes we do not need to implement this
+encoder. We only need to know $P_w^\lambda$, since by Shannon's theorem, the
+length of the encoded (compressed) string will be $-\log_2(P_w^\lambda)$ bits.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Plaintext Transformations}
