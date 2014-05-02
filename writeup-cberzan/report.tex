@@ -17,7 +17,7 @@
 \subtitle{CS281B: Final Project Report}
 \author{Constantin Berzan (joint work with Eric Tzeng)\footnote{We are grateful
 to Wouter M. Koolen for discussion and useful ideas.}}
-\date{May 1, 2014}
+\date{May 2, 2014}
 
 \begin{document}
 \maketitle
@@ -25,9 +25,9 @@ to Wouter M. Koolen for discussion and useful ideas.}}
 \begin{abstract}
 The official implementation of the context tree weighting (CTW) algorithm uses
 a complicated notion of {\em phases} to organize the context trees, providing
-little justification for it. In an attempt to uncover the underlying reasons
-for using phases, we implemented and experimented with several variations of
-the CTW algorithm. This document reports our experiments and results.
+little justification for it. Aiming to understand the reasons for using phases,
+we implemented and experimented with several variations of the CTW algorithm.
+This document reports our experiments and results.
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -36,7 +36,7 @@ the CTW algorithm. This document reports our experiments and results.
 
 Shannon's source coding theorem tells us that a symbol $x$ can be encoded in
 $-\log_2(P(x))$ bits, where $P(x)$ is the probability assigned to symbol $x$ by
-some model. Thus, the higher the probability $P(x)$, the more compression we
+some model. Thus, the higher the probability $P(x)$, the better compression we
 can achieve. Suppose we are trying to compress a bit sequence $x_{1:T}$. We can
 see this sequence as a single symbol $x$, taken from an alphabet of all
 possible binary sequences of length $T$. Then, our model needs to assign a
@@ -45,29 +45,27 @@ possible sequences of length $T$ sums to 1.
 
 Context tree weighting (CTW) is one such probabilistic model that achieves good
 compression performance, and also lends itself to theoretical analysis.
-\textcite{eidma} present the context tree weighting algorithm as operating on a
-sequence of bits. However, their implementation uses a more complicated
-construction. They have an ensemble of 255 context trees, with whole bytes as
-context, and for every bit, they choose the context tree based on the previous
-bits in the same byte. The CTW authors claim\footnote{{\tt
-http://www.ele.tue.nl/ctw/overview/structure.html}} that ``it appeared to be a
-better choice'' to use phases, but they do not provide any insight into why
-this may be the case.
+\textcite{eidma} present the CTW algorithm as operating on a sequence of bits.
+However, their implementation uses a more complicated construction. They have
+an ensemble of 255 context trees, with whole bytes as context, and for every
+bit, they choose the context tree based on the previous bits in the same byte.
+The CTW authors claim\footnote{{\tt
+http://www.ele.tue.nl/ctw/overview/structure.html}} that phases ``appeared to
+be a better choice'', but they do not provide supporting evidence.
 
 Our goal was to understand why CTW with phases does better than the simpler
 binary CTW, or an extension of the binary CTW that predicts whole bytes at a
-time. We implemented these three varieties of the CTW algorithm, and
-investigated their compression performance given various kinds of data. Our
-implementation and experiments are available at {\tt
-https://github.com/cberzan/ctw}.
+time. We implemented these three varieties of weighted context trees, and
+investigated their compression performance. Our implementation and experiments
+are available online\footnote{{\tt https://github.com/cberzan/ctw}}.
 
 The rest of this document is organized as follows: Sections
 \ref{sec:wct-binary}, \ref{sec:wct-phases}, and \ref{sec:wct-bytes} present the
-context tree varieties that we implemented. Section \ref{sec:transformations}
-presents two text transformations that we devised for investigating which
-properties of ASCII the algorithm takes advantage of. Section \ref{sec:results}
-discusses our results, and section \ref{sec:conclusion} states our conclusions
-and ideas for future work.
+three context trees that we implemented. Section \ref{sec:transformations}
+presents two text transformations that we used to investigate whether the
+algorithm takes advantage of certain properties of ASCII text. Section
+\ref{sec:results} discusses our results, and section \ref{sec:conclusion}
+states our conclusions and ideas for future work.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -76,19 +74,17 @@ and ideas for future work.
 
 The Binary Weighted Context Tree (WCTBinary) is a complete binary tree of a
 pre-specified depth. Each node $s$ represents a context, which is a sequence of
-bits. If the node $s$ is a leaf, then it has no children. Otherwise, the node
-$s$ has two children, $0s$ and $1s$, obtained by prepending an additional bit
-of context.  We use $\lambda$ to denote the root node, which represents an
-empty context.
+bits. Every node $s$ that is not a leaf has two children, $0s$ and $1s$,
+obtained by prepending an additional bit of context.  We use $\lambda$ to
+denote the root node, which represents an empty context.
 
-In the implementation, we only allocate memory for the nodes that correspond to
-contexts that have been seen at least once. Each node stores four values: $a$,
-$b$, $P_e$, and $P_w$. We use a superscript to denote which node we are
-referring to. $a$ and $b$ are the number of zero and one bits seen in the
-node's context. $P_e$ is the probability given by the KT estimator for $a$ and
-$b$, i.e. $P_e^s = P_{KT}(a^s, b^s)$. $P_{KT}$ is given by the following
-recurrence:
-
+We only allocate memory for a node if its corresponding context has been seen
+at least once. Each node stores four values: $a$, $b$, $P_e$, and $P_w$. $a$
+and $b$ are the number of zero and one bits seen in the node's context. $P_e$
+is the probability given by the KT estimator for $a$ and $b$, i.e. $P_e^s =
+P_{KT}(a^s, b^s)$. (We use a superscript to denote which node we are referring
+to.) $P_{KT}$ is given by the following recurrence:
+\
 \begin{align*}
 P_{KT}(0, 0)   &= 1 \\
 P_{KT}(a, b+1) &= P_{KT}(a, b) \frac{b + 1/2}{a + b + 1} \\
@@ -133,17 +129,15 @@ path from the leaf node to the root.
 
 At any point, the root weighted probability $P_w^\lambda$ represents the
 probability that the tree assigns to the sequence of bits seen so far, i.e.
-$P(x_{1:t})$. Therefore, the sequence can be encoded (compressed) in
+$P(x_{1:T})$. Therefore, the sequence can be encoded (compressed) in
 $-\log_2(P_w^\lambda)$ bits.
 
 To perform the actual compression, we implemented a simple arithmetic encoder.
 The encoder needs the conditional probability that the next bit is a zero:
-$P(x_{t+1} = 0 | x_{1:t})$. (The probability that the next bit is a one is just
-$P(x_{t+1} = 1 | x_{1:t}) = 1 - P(x_{t+1} = 0 | x_{1:t})$.)
-To obtain this conditional probability, we do a
-``dummy 0 update'' to get $P(x_{1:t}, x_{t+1} = 0)$, and then compute
+$P(x_{T+1} = 0 | x_{1:T})$. To obtain this conditional probability, we do a
+``dummy 0 update'' to get $P(x_{1:T}, x_{T+1} = 0)$, and then compute
 \[
-P(x_{t+1} = 0 | x_{1:t}) = \frac{ P(x_{1:t}, x_{t+1} = 0) }{ P(x_{1:t}) }.
+P(x_{T+1} = 0 | x_{1:T}) = \frac{ P(x_{1:T}, x_{T+1} = 0) }{ P(x_{1:T}) }.
 \]
 A ``dummy 0 update'' means that we traverse the tree and update $P_w^\lambda$
 as if seeing that the next bit is a zero, but without actually making any
@@ -220,10 +214,10 @@ just the product of $P_w$ values at the root of every tree:
 \[
 P(x_{1:T}) = \prod_{n=1}^{255} P_{w, n}^\lambda
 \]
-where $n$ ranges over all trees (the empty prefix, then the prefixes $0$ and
-$1$, then the prefixes $00$, $01$, $10$, $11$, then all prefixes of length 3,
-and so on). This fact can be seen by writing out the probability of the whole
-sequence as a product of conditional probabilities, and factoring the
+where $n$ ranges over all 255 trees (for the empty prefix, then the prefixes
+$0$ and $1$, then the prefixes $00$, $01$, $10$, $11$, then all prefixes of
+length 3, and so on). This fact can be seen by writing out the probability of
+the whole sequence as a product of conditional probabilities, and factoring the
 conditional probabilities according to the tree that they contribute to.
 
 
@@ -238,9 +232,9 @@ stores the symbol counts $n_0, ..., n_{255}$, and the probabilities $P_e$ and
 $P_w$. $P_w$ is computed in the same way as in WCTPhases. $P_e$ is an
 extension of KT to 256 symbols:
 \[
-P_e(n_0, ..., n_i + 1, ..., n_{256}) =
-P_e(n_0, ..., n_i, ..., n_{256})
-\frac{ n_i + 1/2 }{ n_0 + ... + n_{256} + 128 }.
+P_e(n_0, ..., n_i + 1, ..., n_{255}) =
+P_e(n_0, ..., n_i, ..., n_{255})
+\frac{ n_i + 1/2 }{ n_0 + ... + n_{255} + 128 }.
 \]
 
 Using WCTBytes for compression requires a more complicated arithmetic encoder:
@@ -332,9 +326,9 @@ results.
     \begin{tabular}{l|lll}
         & plain text & scrambled text & misaligned text \\
         \hline
-        WCTBinary & 4.69 bits/byte & 5.41 bits/byte & 4.64 bits/byte \\
-        WCTPhases & 3.90 bits/byte & 4.12 bits/byte & 6.87 bits/byte \\
-        WCTBytes  & 4.61 bits/byte & 4.61 bits/byte & 7.45 bits/byte \\
+        WCTBinary & 4.69 bits/char & 5.41 bits/char & 4.64 bits/char \\
+        WCTPhases & 3.90 bits/char & 4.12 bits/char & 6.87 bits/char \\
+        WCTBytes  & 4.61 bits/char & 4.61 bits/char & 7.45 bits/char \\
     \end{tabular}
     \caption{Compression ratio for the various algorithms and plaintext
     transformations.}
@@ -375,21 +369,21 @@ bit at a time, which requires less training data than predicting one byte at a
 time, as in WCTBytes.
 
 We started a few other experiments, whose results were not as clean-cut as the
-ones we presented here. For example, we investigated the most-often visited
-tree branches in WCTBinary, and observed the sequence ...0010000001... over and
-over again. This sequence is composed of the ASCII character space (00100000)
-followed by the first two bits of an ASCII lower-case or upper-case letter. We
-also investigated the trees produced by WCTPhases, and found that some trees
-were more skewed than others. For example, the tree for the phase 01... had a
-high root $P_w$, predicting a 1 with high probability because lower-case
-letters are far more common than upper-case letters. Other trees were less
-certain about their prediction, and had lower root $P_w$ values. We also
-experimented with changing the weighting factor away from 1/2, or making it
-dependent on the depth within the tree, but we did not find any setting that
-performed better than the default. Future work consists of doing more detective
-work to understand other properties of text that the CTW algorithm might take
-advantage of. It would also be interesting to adapt the algorithm to work well
-with other kinds of data, such as images.
+ones we presented here. For example, we investigated the most often visited
+tree branches in WCTBinary, and observed the sequence ...0010000001... as part
+of several contexts. This sequence is composed of the ASCII character space
+(00100000) followed by the first two bits of an ASCII lower-case or upper-case
+letter. We also investigated the trees produced by WCTPhases, and found that
+some trees were more skewed than others. For example, the tree for the phase
+01... had a large root $P_w$, predicting a 1 with high probability because
+lower-case letters (011...) are far more common than upper-case letters
+(010...). Other trees were less certain about their prediction, and had smaller
+root $P_w$ values. We also experimented with changing the weighting factor away
+from 1/2, or making it dependent on the depth within the tree, but we did not
+find any setting that performed better than the default. Future work consists
+of doing more detective work to understand other properties of text that the
+CTW algorithm might exploit. It would also be interesting to adapt the
+algorithm to work well with other kinds of data, such as images.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
