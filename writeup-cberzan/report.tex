@@ -5,6 +5,7 @@
 \usepackage{biblatex}
 \usepackage{caption}
 \usepackage{float}
+\usepackage{fullpage}
 \usepackage{graphicx}
 \usepackage{subcaption}
 
@@ -114,13 +115,6 @@ the sequence $x_{1:T} = 0110100$, with initial context $...010$ and a depth of
 have seen the sequence $s0 = 100$ two times, and the sequence $s1 = 101$ one
 time.
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=12cm]{eidma-fig-3-2-ed.png}
-    \caption{Example binary weighted context tree from \textcite{eidma}.}
-    \label{fig:bin-tree}
-\end{figure}
-
 How do we update this tree? Suppose the next symbol is $x_{T+1} = 0$. The
 context is $x_{T-2:T} = 100$. We simply locate the leaf node $100$, increment
 $a$ because we saw a zero, and update $P_e$ and $P_w$ according to their
@@ -147,6 +141,14 @@ updates during encoding and decoding, the sequence of probabilities sent to the
 encoder and decoder is consistent.
 
 \begin{figure}[h!]
+    \centering
+    \includegraphics[width=12cm]{eidma-fig-3-2-ed.png}
+    \caption{Example binary weighted context tree from \textcite{eidma}.}
+    \label{fig:bin-tree}
+\end{figure}
+
+\begin{figure}[h!]
+    \vspace{1cm}  % HACK
     \centering
     \begin{subfigure}[b]{0.5\textwidth}
 \begin{verbatim}
