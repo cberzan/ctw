@@ -131,10 +131,13 @@ $a$ because we saw a zero, and update $P_e$ and $P_w$ according to their
 definitions. We then update $a$, $b$, $P_e$, and $P_w$ for all the nodes on the
 path from the leaf node to the root.
 
-How do we use this tree for compression? At any point, the root weighted
-probability $P_w^\lambda$ represents the probability that the tree assigns to
-the sequence of bits seen so far, i.e. $P(x_{1:t})$. For the encoder, we need
-the conditional probability that the next bit is a zero:
+At any point, the root weighted probability $P_w^\lambda$ represents the
+probability that the tree assigns to the sequence of bits seen so far, i.e.
+$P(x_{1:t})$. Therefore, the sequence can be encoded (compressed) in
+$-\log_2(P_w^\lambda)$ bits.
+
+To perform the actual compression, we implemented a simple arithmetic encoder.
+The encoder needs the conditional probability that the next bit is a zero:
 $P(x_{t+1} = 0 | x_{1:t})$. (The probability that the next bit is a one is just
 $P(x_{t+1} = 1 | x_{1:t}) = 1 - P(x_{t+1} = 0 | x_{1:t})$.)
 To obtain this conditional probability, we do a
@@ -183,8 +186,6 @@ def decode(enc_data, max_depth):
     \caption{Pseudocode for encoding and decoding.}
     \label{fig:enc-dec}
 \end{figure}
-
-% TODO: talk about the probability of the whole sequence?
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
